@@ -9,3 +9,53 @@ console.log(str); ```
 
 
 
+3. 使用Linux命令复制
+使用Linux命令复制目录非常简单，复制一个目录可以使用cp -r 源目录 目标目录实现。Node.js的child_process使我们可以执行外部命令。
+
+下面是使用child_process模块实现文件复制的示例：
+
+var child_process = require('child_process');
+
+function copyDir(src, dist) {
+  child_process.spawn('cp', ['-r', src, dist]);	
+}
+如，使用这个方法复制./test目录到./new目录：
+
+copyDir('./test', './new');
+
+
+
+
+
+var fs = require('fs');
+console.log('准备写入文件');
+fs.writeFile('input.txt', '我是新写入的内容', function (err) {
+    if (err) console.error(err);
+    console.log('数据写入的数据');
+    console.log('-------------------');
+});
+console.log('读取写入的数据');
+fs.readFile('input.txt', function (err, data) {
+    if (err) console.error(err);
+    console.log('异步读取文件数据：' + data.toString());
+})
+
+fs.writeFile("2.txt","我是2.txt文件",{flag:"a"},function (err) { //a:是追加，在文件中添加新的东西不覆盖文件原有的东西;w:写入，添加新的内容覆盖文件中原有的内容；
+    if(err){
+        console.log(err);
+    }else {
+        console.log("写入成功");
+    }
+})
+fs.appendFile("2.txt","我是追加的字符",function(err){
+    if(err) {
+        return console.log(err);
+    }else{
+        console.log("追加成功");
+    }
+})
+
+作者：马大哈tt
+链接：https://www.jianshu.com/p/482a2d272a21
+來源：简书
+简书著作权归作者所有，任何形式的转载都请联系作者获得授权并注明出处。

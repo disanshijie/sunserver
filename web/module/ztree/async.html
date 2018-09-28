@@ -28,12 +28,16 @@
 	<SCRIPT type="text/javascript">
 		var cacheData={};
 		var nodeDescBox="#nodeDesc";
+		var treeDemo="treeDemo";
 		var setting = {
-
+			view: {
+                addHoverDom: addHoverDom,
+                removeHoverDom: removeHoverDom,
+                selectedMulti: false
+            },
 			edit: {
                 enable: true
 			},
-			
 
             //异步获取数据
 			async: {
@@ -78,7 +82,7 @@
 				onRename:onRename,
 				onDrop:onDrop,
 				onDrag:onDrag,
-				//onRemove:onRemove,
+				onRemove:onRemove,
 				
 				onAsyncError:function(){console.log('onAsyncError');},
 				onAsyncSuccess:function(){console.log('onAsyncSuccess');},
@@ -92,44 +96,66 @@
 				//onMouseDown:function(){console.log('onMouseDown');},
 				//onMouseUp:function(){console.log('onMouseUp');},
 				//onNodeCreated:function(){console.log('onNodeCreated');},
-				onRemove:function(){console.log('onRemove');},
+				//onRemove:function(){console.log('onRemove');},
 				//onRename:function(){console.log('onRename');},
 				onRightClick:function(){console.log('onRightClick');},
 				
 			}
 		};
-
+		
 		//移动
 		function onDrag(event,treeId, thisNode) {
-			cacheData.onDrag=[];
-			console.log('移动onDrag');
-			console.log(event);
-			console.log(treeId);
-			console.log(thisNode);
-			console.log(thisNode[0].getParentNode());
+			 cacheData.onDrag=[];
+			// console.log('移动onDrag');
+			// console.log(event);
+			// console.log(treeId);
+			// console.log(thisNode);
+			// console.log(thisNode[0].getParentNode());
 			cacheData.onDrag[0]={
 				parentDir:thisNode[0].getParentNode().filePath,
 			};
 		}
 		function onDrop(event,treeId, thisNode) {
-			console.log('移动onDrop');
-			console.log(event);
-			console.log(treeId);
-			console.log(thisNode);
-			console.log(thisNode[0].getParentNode());
+			// console.log('移动onDrop');
+			// console.log(event);
+			// console.log(treeId);
+			// console.log(thisNode);
+			// console.log(thisNode[0].getParentNode());
 			
 			var params={
 				originalPath:cacheData.onDrag[0].parentDir+"/"+encodeURI(thisNode[0].name),
 				newDir:thisNode[0].getParentNode().filePath+"/"+encodeURI(thisNode[0].name),
 			};
+			cacheData.onDrag=[];
 			console.log(params);
 			$.post("/operate_move.do",params,function(result){
 				console.log(result);
 			}),"json";
-
+		}
+		
+		//添加
+		function addButton(event,treeId, thisNode) {
+			console.log('添加');
+			console.log(event);
+			console.log(treeId);
+			console.log(thisNode);
+			var params={
+			//	originalPath:thisNode.filePath
+			};
+			// $.post("/operate_delete.do",params,function(result){
+			// 	console.log(result);
+			// }),"json";
 		}
 
-
+		//删除
+		function onRemove(event,treeId, thisNode) {
+			var params={
+				originalPath:thisNode.filePath
+			};
+			$.post("/operate_delete.do",params,function(result){
+				console.log(result);
+			}),"json";
+		}
 		//重命名
 		function onRename(event,treeId, thisNode) {
 			// console.log('重命名');
@@ -137,11 +163,26 @@
 			// console.log(treeId);
 			// console.log(thisNode);
 			//$.post("",{},function(result){}),"json";
+			var originalPath=thisNode.filePath;
+			var parentPath="";
+			if(originalPath.length>1){
+				var index=originalPath.lastIndexOf("/");
+				if(index>0){
+					parentPath=originalPath.substring(0,index);
+				}
+			}
+			var newPath=parentPath+"/"+encodeURI(thisNode.name);
+
 			var params={
-				originalPath:thisNode.filePath,
-				newName:thisNode.name,
+				originalPath:originalPath,
+				newPath:newPath,
+				//newName:thisNode.name,
 			};
 			$.post("/operate_rename.do",params,function(result){
+				if(result && result.success==1){
+					thisNode.filePath=newPath;
+				}
+				
 				console.log(result);
 			}),"json";
 
@@ -202,7 +243,7 @@
             var nodes=responseData.zTree;
 			if (!nodes) return null;
 			for (var i=0, l=nodes.length; i<l; i++) {
-				console.log(nodes[i]);
+				//console.log(nodes[i]);
                 //nodes[i].name = nodes[i].name.replace(/\.n/g, '.');
 			   // nodes[i].filePath=encodeURIComponent(parentPath+"/"+nodes[i].name);
 			   if(nodes[i].pId=='0'){
@@ -225,9 +266,22 @@
 			}
 			return nodes;
 		}
+		
+		//添加相关按钮
+		
+        function addHoverDom(treeId, treeNode) {
+			bindAddMkFile(treeNode); //添加标签
+            bindAddMkDir(treeNode); //添加标签
+
+        };
+        function removeHoverDom(treeId, treeNode) {
+            $("#addBtn_dir_"+treeNode.tId).unbind().remove();//移除添加标签
+            $("#addBtn_file_"+treeNode.tId).unbind().remove();//移除添加标签
+		};
+
 
 		$(document).ready(function(){
-			$.fn.zTree.init($("#treeDemo"), setting);
+			$.fn.zTree.init($("#"+treeDemo), setting);
 		});
 
 	</SCRIPT>
@@ -247,5 +301,73 @@
 		
 	</div>
 </div>
+<script>
+	//
+	var newCount = 12;
+	function bindAddMkDir(treeNode){
+		
+		var sObj = $("#" + treeNode.tId + "_span");
+		if (treeNode.editNameFlag || $("#addBtn_dir_"+treeNode.tId).length>0) return;
+		var addStr = "<span class='button add' id='addBtn_dir_" + treeNode.tId + "' title='add dir' onfocus='this.blur();'></span>";
+		sObj.after(addStr);
+		//onclick='addDir(this,\'" + treeNode.tId + "\')'
+		var btn = $("#addBtn_dir_"+treeNode.tId);
+		if (btn) btn.bind("click", function(){
+			var newNodeName="new node" + (++newCount);
+			var newNodeId=(1000 + newCount);
+
+			var zTree = $.fn.zTree.getZTreeObj(treeDemo);
+			zTree.addNodes(treeNode, {id:newNodeId
+										, pId:treeNode.id
+										, name:newNodeName
+										, filePath:treeNode.filePath+"/"+encodeURI(newNodeName)
+										});
+
+			var params={
+				originalPath:treeNode.filePath,
+				newName:encodeURI(newNodeName),
+				type:"dir",
+			};
+			$.post("/operate_mkdirOrfile.do",params,function(result){
+				console.log(result);
+			}),"json";
+			
+			return false;
+		});
+	}
+
+	function bindAddMkFile(treeNode){
+		var sObj = $("#" + treeNode.tId + "_span");
+		if (treeNode.editNameFlag || $("#addBtn_file_"+treeNode.tId).length>0) return;
+		var addStr = "<span class='button add' id='addBtn_file_" + treeNode.tId + "' title='add file' onfocus='this.blur();'></span>";
+		sObj.after(addStr);
+		//onclick='addDir(this,\'" + treeNode.tId + "\')'
+		var btn = $("#addBtn_file_"+treeNode.tId);
+		if (btn) btn.bind("click", function(){
+			var newNodeName="index" + (++newCount)+".txt";
+			var newNodeId=(1000 + newCount);
+
+			var zTree = $.fn.zTree.getZTreeObj(treeDemo);
+			zTree.addNodes(treeNode, {id:newNodeId
+										, pId:treeNode.id
+										, name:newNodeName
+										, filePath:treeNode.filePath+"/"+encodeURI(newNodeName)
+										});
+
+			var params={
+				originalPath:treeNode.filePath,
+				newName:encodeURI(newNodeName),
+				type:"file",
+			};
+			$.post("/operate_mkdirOrfile.do",params,function(result){
+				console.log(result);
+			}),"json";
+			
+			return false;
+		});
+	}
+
+
+</script>
 </BODY>
 </HTML>

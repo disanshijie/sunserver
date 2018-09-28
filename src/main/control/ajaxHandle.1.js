@@ -1,7 +1,6 @@
 var http = require('http');
 var path = require('path');
-const fs = require('fs');
-const fse = require('fs-extra');
+const fs = require('fs')
 
 var  fileHandle=require('../service/fileHandle');
 var  resultMap=require('../util/resultMap');
@@ -38,8 +37,6 @@ module.exports = {
 		//console.log(obj);
 
 		var originalPath=decodeURI(obj.originalPath);
-		var newPath=decodeURI(obj.newPath);
-
 		var newName=obj.newName;
 		var parentPath="";
 		if(originalPath.length>1){
@@ -48,13 +45,9 @@ module.exports = {
 				parentPath=originalPath.substring(0,index);
 			}
 		}
-		console.log("----重命名---");
-		console.log(originalPath);
-		console.log(newPath);
-		console.log(parentPath+"/"+newName);
 		if(parentPath){
 			//----------原目录/文件--------新目录/文件-----回调函数
-			fs.rename(originalPath,newPath,function(err){
+			fs.rename(originalPath,parentPath+"/"+newName,function(err){
 				if(err){
 					//console.error(err);
 					params.data=err;
@@ -76,22 +69,17 @@ module.exports = {
 		var originalPath=decodeURI(obj.originalPath);
 		var newName=decodeURI(obj.newDir);
 		
-		console.log("----移动---");
+		console.log("----复制---");
 		console.log(originalPath);
 		console.log(newName);
-
-		fse.move(originalPath, newName, { overwrite: false }, err => {
-			if (err) {
-				console.error(err);
-				params.msg='移动失败';
-				//return console.error(err);
-			}else{
-				params.success=1;
-				params.msg='移动成功';
-				//console.log('success!');
-				resultMap(res,params);
-			}
-		});
+		try {
+			fileUtil.copyFile(originalPath,newName);
+			params.success=1;
+			params.msg='移动成功';
+		} catch (error) {
+			params.msg='移动失败';
+		}
+		resultMap(res,params);
 	},
 	'/operate_delete.do':function(req,res,config){
 		var params={};
@@ -101,69 +89,39 @@ module.exports = {
 		
 		console.log("----删除---");
 		console.log(originalPath);
-		fse.remove(originalPath, err => {
-			if (err) {
-				console.error(err);
-				params.msg='删除失败';
-				//return console.error(err);
-			}else{
-				params.success=1;
-				params.msg='删除成功';
-				//console.log('success!');
-			}
-			resultMap(res,params);
-		  })
+		try {
+			fileUtil.deleteFolder(originalPath,newName);
+			params.success=1;
+			params.msg='删除成功';
+		} catch (error) {
+			params.msg='删除成功';
+		}
+		resultMap(res,params);
 	},
-	'/operate_mkdirOrfile.do':function(req,res,config){
+	'/operate_mkdir.do':function(req,res,config){
 		var params={};
 		var obj = getParams(req);
 		//console.log(obj);
 
 		var originalPath=decodeURI(obj.originalPath);
-		var newName=decodeURI(obj.newName);
-		var type=obj.type;
+		var newName=decodeURI(obj.newDir);
 		
 		console.log(originalPath);
 		console.log(newName);
-		if(type==="dir"){
-			fs.mkdir(originalPath+"/"+newName, (err) => {
-				if (err) {
-					params.data=err;
-					params.msg='创建失败';
-				}else{
-					params.success=1;
-					params.msg='创建成功';
-				}
-				resultMap(res,params);
-			});
-		}
-		/*
-		fs.ensureDir(dir, err => {
-			if (err) {
-				console.error(err);
-				params.msg='创建失败';
-				//return console.error(err);
+
+		fs.mkdir('dir', (err) => {
+			if(err){
+				//console.error(err);
+				params.data=err;
+				params.msg='重命名失败';
+				//return;
 			}else{
 				params.success=1;
-				params.msg='创建成功';
-				//console.log('success!');
+				params.msg='重命名成功';
 			}
 			resultMap(res,params);
-		 });
-		 */
+		});
 		
-		else if(type==="file"){
-			fs.writeFile(originalPath+"/"+newName, '我是新写入的内容', function (err) {
-				if (err) {
-					params.data=err;
-					params.msg='创建失败';
-				}else{
-					params.success=1;
-					params.msg='创建成功';
-				}
-				resultMap(res,params);
-			});
-		}		
 	},
 
 }

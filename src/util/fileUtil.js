@@ -5,12 +5,13 @@ var async = require('async');
 var copy=function(src,dst){
     //读取目录
     fs.readdir(src,function(err,paths){
-        console.log(paths)
+        //console.log(paths)
         if(err){
             console.log(err);
             throw err;
         }
-        paths.forEach(function(path){
+        async.map(paths,function(path,callback){
+        //async.forEachSeries来遍历数组中的项---异步循环
             var _src=src+'/'+path;
             var _dst=dst+'/'+path;
             var readable;
@@ -18,7 +19,7 @@ var copy=function(src,dst){
             stat(_src,function(err,st){
                 if(err){
                     console.log(err);
-                    throw err;
+                    //throw err;
                 }
                 
                 if(st.isFile()){
@@ -28,7 +29,12 @@ var copy=function(src,dst){
                 }else if(st.isDirectory()){
                     exists(_src,_dst,copy);
                 }
+                callback(null); //没有不走下面的
             });
+        }, function(err,results) {
+                console.log("async返回");
+                console.log(results);
+
         });
         
     });
