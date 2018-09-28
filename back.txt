@@ -1,0 +1,11 @@
+//js源代码 --- 读取本地input.txt文件
+var iconv = require('iconv-lite');
+var fs = require('fs');
+var fileStr = fs.readFileSync('input.txt', {encoding:'binary'});
+var buf = new Buffer(fileStr, 'binary');
+var str = iconv.decode(buf,'utf8');
+console.log(str); ```
+思路：读取文件->按二进制编码->再按utf-8解码
+
+
+

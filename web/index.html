@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Page Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
+
+    <script src="./common/js/jquery.min.js"></script>
+</head>
+<body>
+    <div class="">
+        <div>hello world 你好</div>
+        <div>
+            <form action="/get" method="get">
+                <input type="text" name="rootPath" id="rootPath" value="E:/opt">
+                <input type="text" name="fileName" id="fileName">
+                <input type="submit" value="提交">
+            </form>
+        </div>
+        <div>
+            
+            <input type="button" value="js提交" onclick="dopost(this)">
+
+            <input type="button" value="提交path" onclick="getFileList(this)">
+
+
+        </div>
+    </div>
+   
+</body>
+</html>
+<script>
+
+    function dopost(){
+        var rootPath=$("#rootPath").val();
+        var fileName=$("#fileName").val();
+       // alert(rootPath);
+        $.post("/post",{'rootPath':rootPath,'fileName':fileName},function(data){
+
+            console.log(data);
+        }),"json";
+    }
+
+    function getFileList(){
+        var rootPath=$("#rootPath").val();
+        var fileName=$("#fileName").val();
+      //  alert(rootPath);
+        $.post("/getFileList",{'rootPath':rootPath,'fileName':fileName},function(data){
+
+            console.log(data);
+        }),"json";
+    }
+</script>
