@@ -305,7 +305,9 @@
 	//
 	var newCount = 12;
 	function bindAddMkDir(treeNode){
-		
+		if(!treeNode.isParent){
+			return;
+		}
 		var sObj = $("#" + treeNode.tId + "_span");
 		if (treeNode.editNameFlag || $("#addBtn_dir_"+treeNode.tId).length>0) return;
 		var addStr = "<span class='button add' id='addBtn_dir_" + treeNode.tId + "' title='add dir' onfocus='this.blur();'></span>";
@@ -337,6 +339,10 @@
 	}
 
 	function bindAddMkFile(treeNode){
+		if(!treeNode.isParent){
+			return;
+		}
+
 		var sObj = $("#" + treeNode.tId + "_span");
 		if (treeNode.editNameFlag || $("#addBtn_file_"+treeNode.tId).length>0) return;
 		var addStr = "<span class='button add' id='addBtn_file_" + treeNode.tId + "' title='add file' onfocus='this.blur();'></span>";
