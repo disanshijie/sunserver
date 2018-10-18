@@ -9,6 +9,7 @@ const compress = require('../../util/compress')
 const isFresh = require('../../util/cache')
 const readFileToStr = require('../../util/readFileToStr')
 
+//获取文件目录结构，并以json格式返回
 module.exports = async function (req, res, params, config) {
  
     try {

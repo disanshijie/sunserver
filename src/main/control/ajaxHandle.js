@@ -6,6 +6,7 @@ const fse = require('fs-extra');
 var  fileHandle=require('../service/fileHandle');
 var  resultMap=require('../util/resultMap');
 var  fileUtil=require('../../util/fileUtil');
+var  downloadFile=require('../util/download/download');
 
 module.exports = {
     '/get':function(req,res){
@@ -21,6 +22,50 @@ module.exports = {
 		});
 		res.setHeader("Content-Type","text/plain; charset=utf-8");  
 		res.end('p名字是:' + obj.rootPath + ' , p年龄是:' + obj.fileName);
+	},
+	//直接打开文件
+	'/open.node':function(req,res){
+        //var rootPath = req.query.rootPath;
+		var raw = req.query.raw;
+		var filePath = req.query.url;
+		if(raw==1){	//下载
+			//下载文件
+			var params={
+				'originalPath':filePath,
+				"fileName":filePath.substring(filePath.lastIndexOf('/'),filePath.length),
+				'way':2
+			}
+			downloadFile.simple(res,params);
+		}else if(raw==2){	//文本形式
+			//TODO 返回编码不对
+			fs.readFile(filePath,'binary',function(err,fileContent){
+				if(err){
+					res.writeHead(404,"Not Found");
+					res.end('<h1>404 Not Found!</h1>');
+				}else{
+					res.writeHead(200, {
+						'Content-Type': 'text/plain',
+					});
+					res.write(fileContent,'binary');
+					res.end();	
+				}
+			});
+		}else {	//默认
+			//异步读取文件数据
+			fs.readFile(filePath,'binary',function(err,fileContent){
+				if(err){
+					res.writeHead(404,"Not Found");
+					res.end('<h1>404 Not Found!</h1>');
+				}else{
+					res.writeHead(200,'ok');
+					res.write(fileContent,'binary');
+					res.end();	
+				}
+			});
+		}
+
+		//res.setHeader("Content-Type","text/plain; charset=utf-8"); 
+       // res.end('当前路径是：'+ rootPath + ' 年龄是：'+fileName);
 	},
 
 	'/getFileList.do':function(req,res,config){
@@ -165,7 +210,44 @@ module.exports = {
 			});
 		}		
 	},
+	//下载图片文件，返回Base64
+	'/file/downloadBase64Img.node':function(req,res,config){
+		var responseBody = {};
 
+		var obj = getParams(req);
+		var originalPath=decodeURI(obj.originalPath);
+		
+		var filePath = originalPath;
+		if(fs.existsSync(filePath)){
+			var data = fs.readFileSync(filePath);
+			var dataBase64 = data.toString('base64');
+			responseBody ={
+				code:'200',
+				data:{
+					filePath:filePath,
+					fileData:dataBase64,
+				},
+				success:'1'
+			};
+			
+		}else{
+			responseBody={
+				code:'400',
+				msg:'没有此文件'
+			};
+		}
+		
+		resultMap(res,responseBody);
+	}
+	//下载文件
+	,'/file/downloadFile.node':function(req,res,config){
+		var responseBody = {};
+
+		var obj = getParams(req);
+		downloadFile.simple(res,obj);
+	}
+
+	
 }
 
 //格式化参数

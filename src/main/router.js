@@ -11,7 +11,7 @@ const tplPath = path.join(__dirname, '../template/dir.tpl')
 const source = fs.readFileSync(tplPath)
 const template = Handlebars.compile(source.toString())
 
-
+//TODO 有用到吗
 module.exports = async function (req, res, filePath, config) {
     try {
         const stats = await stat(filePath)

@@ -4,10 +4,8 @@
 	<TITLE> ZTREE DEMO - Async</TITLE>
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
 
-	<link rel="stylesheet" href="./css/bootstrapStyle/bootstrapStyle.css" type="text/css">
-	<link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
-	<!-- table可变 -->
-	<link rel="stylesheet" href="../bootstrap-table/bootstrap-table.css">
+    <link rel="stylesheet" href="./css/bootstrapStyle/bootstrapStyle.css" type="text/css">
+
 	<style>
 		.zTreeDemoBackground{
 			width:40%;
@@ -42,30 +40,12 @@
 			list-style: none outside none;
 			background-color:#ffffff;
 		}
-		/* 移动table */
-		.table-web{
-			width:1200px;
-			height:auto;
-		}
-		.table-web td{
-			vertical-align: top;
-		}
+
 	</style>
 
-
-
 	<script src="./js/jquery.min.js"></script>
-	<!-- table可变 -->
-	<script type="text/javascript" src="../bootstrap/js/bootstrap.min.js"></script>
-	<script type="text/javascript" src="../bootstrap-table/bootstrap-table.js"></script>
-	<script type="text/javascript" src="../bootstrap-table/bootstrap-table-resizable.js"></script>
-	<script type="text/javascript" src="../bootstrap-table/colResizable-1.6.min.js"></script>
-
 	<script type="text/javascript" src="./js/jquery.ztree.all.min.js"></script>
 
-	<script type="text/javascript" src="../../common/js/base.js"></script>
-	<script type="text/javascript" src="../../common/js/common.js"></script>
-	<script type="text/javascript" src="../../common/js/extends.js"></script>
 	<script type="text/javascript" src="./js/async.js"></script>
 
 	<SCRIPT type="text/javascript">
@@ -73,6 +53,12 @@
 		var nodeDescBox="#nodeDesc";
 		var treeDemo="treeDemo";
 		var zTree, rMenu;
+
+		$(document).ready(function(){
+			$.fn.zTree.init($("#"+treeDemo), setting);
+			zTree = $.fn.zTree.getZTreeObj("treeDemo");
+			rMenu = $("#rMenu");
+		});
 
 		var setting = {
 			view: {
@@ -171,134 +157,55 @@
 			}
 			if(responseData.desc){
 				var desc=responseData.desc;
-				var prevDir=responseData.prevDir;
 				if(!cacheData.desc){
 					cacheData.desc={};
-					cacheData.prevDir={};
 				}
 				if(!parentNode){parentNode={},parentNode.id='1',parentNode.pId='0'}
 				cacheData.desc[parentNode.pId+"_"+parentNode.id]=desc;
-				cacheData.prevDir[parentNode.pId+"_"+parentNode.id]=prevDir;
 				
 				var  desc_name=desc.name;
-				var  desc_type=desc.type;//<textarea style="width:600px;height:300px;"></textarea>
+				var  desc_type=desc.type;
 				$(nodeDescBox).html('<pre>'+desc.content+'</pre>');
 			}
 			return nodes;
 		}
 
-		$(document).ready(function(){
-			$("#table-vue").colResizable({
-			liveDrag: true,//实时显示滑动位置
-			gripInnerHtml: "<div class='grip'></div>",
-			//draggingClass: "dragging",
-			postbackSafe: true,//刷新后保留之前的拖拽宽度
-			headerOnly:true,
-			//onResize: onSampleResized,
-			//resizeMode:'overflow'
-			});
-
-			$.fn.zTree.init($("#"+treeDemo), setting);
-			zTree = $.fn.zTree.getZTreeObj("treeDemo");
-			rMenu = $("#rMenu");
-
-			pageEventInit();
-		});
-
 	</SCRIPT>
 </HEAD>
 
 <BODY>
-<h2>异步加载节点数据的树</h2>
+<h1>异步加载节点数据的树</h1>
 <h6>[ 文件路径: core/async.html ]</h6>
 <div class="content_wrap">
+	<div class="module-ztree">
+		<div class="zTreeDemoBackground left">
+			<ul id="treeDemo" class="ztree"></ul>
+		</div>
 
+	</div>
+		<div id="nodeDesc" class="node-desc">
+		123tuy 
+	</div>
 	<div class="right">
+		
 	</div>
 </div>
 
-	<table id="table-vue" class="table-web" border="0" cellpadding="0" cellspacing="0" style="">
-		<thead>
-		<tr>
-			<th width="250px">菜单</th>
-			<th width="900px;" >内容</th>
-			<th data-field="price" data-sortable="true">.</th>
-		</tr>
-		</thead>
-		<tbody>
-			<tr>
-				<td>
-					<div class="module-ztree">
-						<div class="zTreeDemoBackground left">
-							<ul id="treeDemo" class="ztree"></ul>
-						</div>
-				
-					</div>
-				</td>
-				<td>
-					<div>
-						<span id="">路径：</span><span id="prevDirPath">..</span>
-					</div>	
-					<div>
-						<div><a href="javascript:;" style="float:right;" id="nodeDescToggle" onclick="nodeDescToggle(this,'#nodeDesc')">折叠</a> </div>
-						<div id="nodeDesc" class="node-desc"></div>
-					</div>
-					<div>
-						<h3>文件上传</h3>
-						<form action="" method="post">
-							<input type="file" name="" id="">
-						</form>
-					</div>
-					<div>
-						<h3>编辑</h3>
-					</div>
-				</td>
-				<td>.</td>
-			</tr>
-		</tbody>
-	</table>
+<div id="rMenu">
+	<ul>
+		<li id="m_add" onclick="addTreeNode();">增加节点</li>
+		<li id="m_del" onclick="removeTreeNode();">删除节点</li>
+		<li id="m_check" onclick="checkTreeNode(true);">Check节点</li>
+		<li id="m_unCheck" onclick="checkTreeNode(false);">unCheck节点</li>
+		<li id="m_reset" onclick="resetTree();">恢复zTree</li>
+		
+		<li id="m_refresh" onclick="refreshTree();">刷新</li>
+		<li id="m_copy" onclick="copyTree();">复制zTree</li>
+		<li id="m_copy_path" onclick="copyPathTreeNode();">复制节点路径</li>
+		<li id="m_cut" onclick="cutTree();">剪切zTree</li>
+		<li id="m_paste" onclick="pasteTree();">粘贴zTree</li>
 
-
-	<div id="rMenu">
-		<ul>
-			<li id="m_openFileNewTab" onclick="openFileNewTab();">打开文件</li>
-			<li id="m_openFileLocation" onclick="openFileLocation();">打开文件目录</li>
-			<li id="m_add" onclick="addTreeNode();">增加节点</li>
-			<li id="m_del" onclick="removeTreeNode();">删除节点</li>
-			<li id="m_download" onclick="downloadFile();">下载</li>
-
-			<li id="m_check" onclick="checkTreeNode(true);">Check节点</li>
-			<li id="m_unCheck" onclick="checkTreeNode(false);">unCheck节点</li>
-			<li id="m_reset" onclick="resetTree();">恢复zTree</li>
-			
-			<li id="m_refresh" onclick="refreshTree();">刷新</li>
-			
-			<li id="m_copy_path" onclick="copyPathTreeNode();">复制节点路径</li>
-			<li id="m_copy" onclick="copyTree();">复制zTree</li>
-			<li id="m_cut" onclick="cutTree();">剪切zTree</li>
-			<li id="m_paste" onclick="pasteTree();">粘贴zTree</li>
-
-		</ul>
-	</div>
+	</ul>
+</div>
 </BODY>
 </HTML>
-
-<script>
-	function pageEventInit(){
-
-	}
-
-	function nodeDescToggle(obj,goal){
-		$(goal).slideToggle("slow");
-		var status=$(obj).attr("sun-status");
-		if(status==1){
-			$(obj).attr("sun-status","0");
-			$(obj).html("折叠");
-		}else{
-			$(obj).attr("sun-status","1");
-			$(obj).html("展开");
-		}
-
-	}
-
-</script>

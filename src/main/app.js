@@ -40,6 +40,10 @@ class Server {
 
             }else{
 
+                /*
+                 * 获取web目录下的静态文件
+                 */
+
                 var staticPath = path.join(this.conf.root,'web');
                 //如果没有后缀，默认他显示是index.html
                 if(pathObj.pathname =='/'){
